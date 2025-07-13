@@ -358,17 +358,25 @@ async def start(client:Client, message):
         replyed = await message.reply(
             delCap
         )
-        await asyncio.sleep(FILE_AUTO_DEL_TIMER)
-        for file in files_to_delete:
-            try:
-                await file.delete()
-            except:
-                pass
-        return await replyed.edit(
-            afterDelCap,
-        )
-    if not data:
-        return
+        @app.on_message(filters.command("autodelete"))
+async def toggle_autodelete(client, message):
+    global AUTO_DELETE_ENABLED
+
+    cmd = message.text.split()
+    if len(cmd) < 2:
+        return await message.reply("Usage: /autodelete on | off")
+
+    arg = cmd[1].lower()
+
+    if arg == "on":
+        AUTO_DELETE_ENABLED = True
+        await message.reply("✅ Auto-delete is now **enabled**.")
+    elif arg == "off":
+        AUTO_DELETE_ENABLED = False
+        await message.reply("❌ Auto-delete is now **disabled**.")
+    else:
+        await message.reply("Invalid option. Use `/autodelete on` or `/autodelete off`.")
+
 
     files_ = await get_file_details(file_id)           
     if not files_:
