@@ -358,13 +358,18 @@ async def start(client:Client, message):
         replyed = await message.reply(
             delCap
         )
-        @app.on_message(filters.command("autodelete"))
+        from pyrogram import Client, filters
+
+AUTO_DELETE_ENABLED = True  # Global toggle (default ON)
+
+@Client.on_message(filters.command("autodelete"))
 async def toggle_autodelete(client, message):
     global AUTO_DELETE_ENABLED
 
     cmd = message.text.split()
     if len(cmd) < 2:
-        return await message.reply("Usage: /autodelete on | off")
+        await message.reply("Usage: /autodelete on | off")
+        return
 
     arg = cmd[1].lower()
 
@@ -376,6 +381,7 @@ async def toggle_autodelete(client, message):
         await message.reply("❌ Auto-delete is now **disabled**.")
     else:
         await message.reply("Invalid option. Use `/autodelete on` or `/autodelete off`.")
+
 
 
     files_ = await get_file_details(file_id)           
