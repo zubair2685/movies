@@ -2,8 +2,7 @@ from pyrogram import Client, filters
 from pyrogram.types import Message
 from datetime import datetime
 from pymongo import MongoClient
-from config import DATABASE_URI, DATABASE_NAME, COLLECTION_NAME
-
+from bot_config import DATABASE_URI, DATABASE_NAME, COLLECTION_NAME
 # Connect to your MongoDB database
 mongo_client = MongoClient(DATABASE_URI)
 db = mongo_client[DATABASE_NAME]
