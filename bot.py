@@ -93,3 +93,6 @@ if __name__ == '__main__':
         loop.run_until_complete(Jisshu_start())
     except KeyboardInterrupt:
         logging.info('Service Stopped Bye 👋')
+
+
+from indexer import *  # This will load /single and /batch
