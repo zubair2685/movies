@@ -3,50 +3,79 @@ from pyrogram.types import Message
 from pymongo import MongoClient
 from info import DATABASE_URI, DATABASE_NAME, COLLECTION_NAME
 
-# MongoDB Setup
+# MongoDB setup
 mongo_client = MongoClient(DATABASE_URI)
 db = mongo_client[DATABASE_NAME]
 collection = db[COLLECTION_NAME]
 
-# Track user mode
-user_mode = {}  # user_id: "single" or "batch"
+# Track user modes
+user_mode = {}  # user_id: "single" | "batch"
 
+
+# -------------------- SINGLE INDEX MODE --------------------
 @Client.on_message(filters.command("single") & filters.private)
-async def start_single_index(client, message: Message):
+async def single_index_mode(client: Client, message: Message):
     user_mode[message.from_user.id] = "single"
-    await message.reply_text("✅ Single index mode activated.\nNow send the video/file you want to index.")
+    await message.reply_text("✅ Single index mode ON\nAb ek file bhejo, woh DB me save ho jayegi.")
 
+
+# -------------------- BATCH INDEX MODE --------------------
 @Client.on_message(filters.command("batch") & filters.private)
-async def start_batch_index(client, message: Message):
+async def batch_index_mode(client: Client, message: Message):
     user_mode[message.from_user.id] = "batch"
-    await message.reply_text("✅ Batch index mode activated.\nNow send multiple files (one by one) to index.\nSend /done when finished.")
+    await message.reply_text("✅ Batch index mode ON\nAb multiple files bhejo, sab DB me save ho jayengi.")
 
-@Client.on_message(filters.command("done") & filters.private)
-async def stop_batch_index(client, message: Message):
-    user_mode.pop(message.from_user.id, None)
-    await message.reply_text("❌ Batch indexing stopped.")
 
-@Client.on_message(filters.private & filters.media)
-async def handle_file(client, message: Message):
-    user_id = message.from_user.id
-    mode = user_mode.get(user_id)
+# -------------------- HANDLE FILE SAVING --------------------
+@Client.on_message(filters.document | filters.video | filters.audio)
+async def save_files(client: Client, message: Message):
+    mode = user_mode.get(message.from_user.id)
 
-    if mode not in ["single", "batch"]:
-        return  # User has not activated indexing mode
+    if not mode:
+        return  # agar mode ON nahi hai to kuch mat karo
 
-    if not message.caption:
-        await message.reply_text("⚠️ This file has no caption, skipping.")
-        return
+    file_id, file_name, file_size, mime_type = None, None, None, None
 
-    file_data = {
-        "file_id": message.id,
-        "chat_id": message.chat.id,
-        "caption": message.caption,
-        "file_type": str(message.media),
-    }
+    if message.document:
+        file_id = message.document.file_id
+        file_name = message.document.file_name
+        file_size = message.document.file_size
+        mime_type = message.document.mime_type
+    elif message.video:
+        file_id = message.video.file_id
+        file_name = message.video.file_name
+        file_size = message.video.file_size
+        mime_type = message.video.mime_type
+    elif message.audio:
+        file_id = message.audio.file_id
+        file_name = message.audio.file_name
+        file_size = message.audio.file_size
+        mime_type = message.audio.mime_type
 
-    collection.insert_one(file_data)
-    await message.reply_text(f"✅ File indexed successfully in {mode} mode.")
+    if file_id:
+        data = {
+            "file_id": file_id,
+            "file_name": file_name,
+            "file_size": file_size,
+            "mime_type": mime_type,
+            "mode": mode,
+            "indexed_by": message.from_user.id
+        }
 
-    if mode == "single":
-        user_mode.pop(user_id, None)
+        # duplicate check
+        if collection.find_one({"file_id": file_id}):
+            await message.reply_text(f"⚠️ Already in DB:\n**{file_name}**")
+            return
+
+        collection.insert_one(data)
+        await message.reply_text(f"✅ Saved in DB:\n**{file_name}**")
+
+
+# -------------------- STOP INDEX MODE --------------------
+@Client.on_message(filters.command("stopindex") & filters.private)
+async def stop_index_mode(client: Client, message: Message):
+    if message.from_user.id in user_mode:
+        del user_mode[message.from_user.id]
+        await message.reply_text("🛑 Index mode stopped.")
+    else:
+        await message.reply_text("❌ Aapne koi index mode start hi nahi kiya.")
