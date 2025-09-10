@@ -13,9 +13,9 @@ def is_enabled(value, default):
 #---------------------------------------------------------------
 #---------------------------------------------------------------         ,
 SESSION = environ.get('SESSION', 'Media_search')
-API_ID = int(environ.get('API_ID', '25475843'))
-API_HASH = environ.get('API_HASH', '61cc2f8641d9017e03fbd963cc0fdfdd')
-BOT_TOKEN = environ.get('BOT_TOKEN', '7579919947:AAGkRR3xtA1qxCi-7bhuJev9VPexD6mhZls')
+API_ID = int(environ.get('API_ID', '25334843'))
+API_HASH = environ.get('API_HASH', '61cc2f9591d9017e03fbd858cc0fdfdd')
+BOT_TOKEN = environ.get('BOT_TOKEN', '7293203759:AAH4BUJLWTLXCqmEshQJyt2a0JJ6vMEO89g')
 #---------------------------------------------------------------
 #---------------------------------------------------------------
 ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '1269198336').split()]
@@ -25,8 +25,8 @@ MOVIE_GROUP_LINK = environ.get('MOVIE_GROUP_LINK', 'https://t.me/+K2kgCBgaat80YW
 CHANNELS = [int(ch) if id_pattern.search(ch) else ch for ch in environ.get('CHANNELS', '').split()]
 #---------------------------------------------------------------
 #---------------------------------------------------------------
-DATABASE_URI = environ.get('DATABASE_URI', "")
-DATABASE_NAME = environ.get('DATABASE_NAME', "")
+DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://zubair34233:cqGlfj4AT3b0m4Ay@cluster0.rkp7k8e.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+DATABASE_NAME = environ.get('DATABASE_NAME', "zubair34233")
 COLLECTION_NAME = environ.get('COLLECTION_NAME', 'Telegram_files')
 #---------------------------------------------------------------
 #---------------------------------------------------------------
